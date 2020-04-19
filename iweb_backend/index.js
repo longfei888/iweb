@@ -1,0 +1,95 @@
+/*整个应用程序的入口模块*/
+const express = require('express')
+const cors = require('cors')
+const bodyParser = require('body-parser')
+const session = require('express-session')
+const errorHandler = require('errorhandler')
+
+//WEB服务器监听的端口
+let  port = 8080
+let  app = express()
+app.listen(port, ()=>{
+	console.log('Server Listening on port '+port)
+})
+
+/*添加请求处理中间件*/
+//1.使用cors中间件，所有的响应消息都添加头部access-control-allow-origin
+app.use(cors({
+	//如果客户端请求携带了身份认证信息(withCredentials=true)，此处不能设置为*
+	origin: ['http://192.168.199.115:8081'], //Access-Control-Allow-Origin
+	//服务器允许客户端请求提交身份认证信息
+	credentials: true,		//Access-Control-Allow-Credentials
+}))
+//2.使用session中间件，所有的响应消息中都会Cookie头部：connect-sid
+app.use(session({
+	secret: 'iweb123',   //使用此秘钥对connect-sid进行加密
+	saveUninitialized: true,	//是否保存从未初始化过的session数据
+	resave: false	//是否自动存储所有的会话——即使没有更新
+}))
+//3.使用bodyParser中间件，是的服务器端获得请求消息主体数据被解析到req.body
+app.use(bodyParser.urlencoded({
+	extended: false 	//不使用第三方扩展工具解析请求主体(Node.js自带即可)
+}))
+
+/*创建处理各种请求的路由器*/
+//处理所有“用户”相关请求的路由器——userRouter
+const userRouter = require('./router/user')
+app.use('/user', userRouter)
+
+//处理所有“用户收藏夹”相关请求的路由器——favoriteRouter
+const favoriteRouter = require('./router/favorite')
+app.use('/favorite', favoriteRouter)
+
+//处理所有“课程分类”相关请求的路由器——typeRouter
+const typeRouter = require('./router/type')
+app.use('/type', typeRouter)
+
+//处理所有“课程”相关请求的路由器——courseRouter
+const courseRouter = require('./router/course')
+app.use('/course', courseRouter)
+
+//处理所有“讲师”相关请求的路由器——teacherRouter
+const teacherRouter = require('./router/teacher')
+app.use('/teacher', teacherRouter)
+
+//处理所有“购物车”相关请求的路由器——cartRouter
+const loginCheck = require('./middleware/loginCheck')
+app.use('/cart', loginCheck)	//中间件：所有的“购物车”路由，先检查是否登录
+const cartRouter = require('./router/cart')
+app.use('/cart', cartRouter)	//用户已经登录，调用业务路由
+
+//处理所有“验证码”相关请求的路由器——captchaRouter
+const captchaRouter = require('./router/captcha')
+app.use('/captcha', captchaRouter)
+
+/*手工测试：向客户端输出随机的验证码*/
+/*
+const captcha = require('svg-captcha')
+app.get('/c', (req, res, next)=>{
+	//let c = captcha.create()			//使用默认选项生成验证码
+	let options = {
+		size: 5, 				// 验证码长度，默认值为4
+		//ignoreChars: '0o1i', 	// 验证码字符中排除，默认值为''
+		noise: 4, 				// 干扰线条的数量，默认值为1
+		color: true, 			// 验证码的字符是否有颜色，默认值为false
+		//background: '#eef', 	// 验证码图片背景颜色，默认值为''
+		width: 120, 			// width of captcha，默认值为150
+		height: 40, 			// height of captcha，默认值为50
+		fontSize: 50,			// captcha text size，默认值为56
+		//charPreset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',		 	// random character preset
+	}
+	let c = captcha.create(options)		//使用自定义选项生成验证码
+	
+	console.log('服务器端保存的验证码：',  c.text)
+	res.type('svg')		//修改响应消息的Content-Type
+	res.send(c.data) 	//向客户端发送随机验证码图片
+})
+*/
+
+/*
+//Express默认提供了一个如下形式的“错误处理中间件”——专用于处理各种异步错误
+app.use((err, req, res, next)=>{
+	console.log(err)
+	//此处可以把err输出到一个err.log文件中
+})
+*/

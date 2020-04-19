@@ -1,0 +1,35 @@
+{
+  "name": "iweb_backend",
+  "version": "1.0.0",
+  "description": "iweb project backend subsystem, data API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node  test.js",
+    "start": "node  index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lwh/iweb_backend.git"
+  },
+  "keywords": [
+    "iweb",
+    "backend",
+    "api",
+    "tedu"
+  ],
+  "author": "LiWenhua",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lwh/iweb_backend/issues"
+  },
+  "homepage": "https://github.com/lwh/iweb_backend#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "errorhandler": "^1.5.1",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "mysql": "^2.18.1",
+    "svg-captcha": "^1.4.0"
+  }
+}
